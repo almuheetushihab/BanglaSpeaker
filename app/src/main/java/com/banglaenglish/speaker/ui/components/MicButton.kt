@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.banglaenglish.speaker.R
 import com.banglaenglish.speaker.ui.screen.speaker.Phase
@@ -40,14 +41,15 @@ import com.banglaenglish.speaker.ui.theme.AppTheme
 import com.banglaenglish.speaker.ui.theme.BanglaSpeakerTheme
 
 /**
- * Large 100dp hero circular mic button with Primary gradient background, glow and animated pulse rings while listening.
+ * Circular mic button with Primary gradient background, glow and animated pulse rings while listening.
  */
 @Composable
 fun MicButton(
     phase: Phase,
     level: Float,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    buttonSize: Dp = 60.dp
 ) {
     val listening = phase == Phase.Listening
     val translating = phase == Phase.Translating
@@ -70,25 +72,23 @@ fun MicButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val pressScale by animateFloatAsState(
-        targetValue = if (isPressed) 0.94f else 1f,
+        targetValue = if (isPressed) 0.92f else 1f,
         label = "micPressScale"
     )
 
     val buttonBrush = if (listening) AppTheme.colors.warmGradient else AppTheme.colors.primaryGradient
 
     Box(
-        modifier = modifier
-            .padding(vertical = 12.dp)
-            .size(136.dp),
+        modifier = modifier.size(buttonSize + 12.dp),
         contentAlignment = Alignment.Center
     ) {
         // Glowing animated pulse ring
         if (listening) {
             Box(
                 modifier = Modifier
-                    .size(96.dp)
+                    .size(buttonSize)
                     .graphicsLayer {
-                        val s = 1f + pulse * 0.65f + animatedLevel * 0.35f
+                        val s = 1f + pulse * 0.6f + animatedLevel * 0.3f
                         scaleX = s
                         scaleY = s
                         alpha = (1f - pulse) * 0.45f
@@ -100,8 +100,8 @@ fun MicButton(
         Box(
             modifier = Modifier
                 .scale(pressScale)
-                .size(96.dp)
-                .shadow(12.dp, CircleShape)
+                .size(buttonSize)
+                .shadow(8.dp, CircleShape)
                 .clip(CircleShape)
                 .background(buttonBrush)
                 .clickable(
@@ -114,9 +114,9 @@ fun MicButton(
         ) {
             if (translating) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(buttonSize * 0.45f),
                     color = Color.White,
-                    strokeWidth = 3.dp
+                    strokeWidth = 2.5.dp
                 )
             } else {
                 Icon(
@@ -127,7 +127,7 @@ fun MicButton(
                         stringResource(R.string.action_speak)
                     },
                     tint = Color.White,
-                    modifier = Modifier.size(44.dp)
+                    modifier = Modifier.size(buttonSize * 0.5f)
                 )
             }
         }

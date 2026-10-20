@@ -43,6 +43,7 @@ fun TopBarHeader(
 ) {
     Surface(
         shape = HeaderBottomCornersShape,
+        color = Color.Transparent,
         shadowElevation = 8.dp,
         modifier = modifier.fillMaxWidth()
     ) {

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -211,7 +210,7 @@ fun SpeakerScreenContent(
     ScreenBackground(modifier = modifier) {
         Scaffold(
             containerColor = Color.Transparent,
-            contentWindowInsets = WindowInsets.safeDrawing,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 TopBarHeader(
@@ -347,16 +346,15 @@ fun SpeakerScreenContent(
                 // Bottom Panel & Dictation Session Controls
                 Surface(
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                    shadowElevation = 16.dp,
+                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                    shadowElevation = 12.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Real-time dictation text & visualizer
                         if (state.phase == Phase.Listening) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -375,50 +373,69 @@ fun SpeakerScreenContent(
                                 text = liveDisplay.ifBlank { stringResource(R.string.status_listening) },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(vertical = 4.dp)
+                                modifier = Modifier.padding(vertical = 2.dp)
                             )
 
-                            Button(
-                                onClick = onFinishDictation,
+                            Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = CircleShape
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(imageVector = Icons.Rounded.Done, contentDescription = null)
-                                Text(
-                                    text = stringResource(R.string.action_done),
-                                    modifier = Modifier.padding(start = 8.dp)
+                                Button(
+                                    onClick = onFinishDictation,
+                                    modifier = Modifier.weight(1f),
+                                    shape = CircleShape
+                                ) {
+                                    Icon(imageVector = Icons.Rounded.Done, contentDescription = null)
+                                    Text(
+                                        text = stringResource(R.string.action_done),
+                                        modifier = Modifier.padding(start = 8.dp)
+                                    )
+                                }
+
+                                MicButton(
+                                    phase = state.phase,
+                                    level = state.micLevel,
+                                    onClick = onFinishDictation,
+                                    buttonSize = 56.dp
                                 )
                             }
                         } else if (state.phase != Phase.EditingTranscript) {
-                            // Mic Button & Text Field when Idle
-                            MicButton(
-                                phase = state.phase,
-                                level = state.micLevel,
-                                onClick = onMic
-                            )
-
-                            OutlinedTextField(
-                                value = typed,
-                                onValueChange = onTypedChange,
+                            Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                enabled = state.phase != Phase.Translating,
-                                singleLine = true,
-                                shape = CircleShape,
-                                placeholder = { Text(stringResource(R.string.text_input_placeholder)) },
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                                keyboardActions = KeyboardActions(onSend = { onSend() }),
-                                trailingIcon = {
-                                    IconButton(
-                                        onClick = onSend,
-                                        enabled = typed.isNotBlank()
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Rounded.Send,
-                                            contentDescription = stringResource(R.string.action_send)
-                                        )
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                OutlinedTextField(
+                                    value = typed,
+                                    onValueChange = onTypedChange,
+                                    modifier = Modifier.weight(1f),
+                                    enabled = state.phase != Phase.Translating,
+                                    singleLine = true,
+                                    shape = CircleShape,
+                                    placeholder = { Text(stringResource(R.string.text_input_placeholder)) },
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                                    keyboardActions = KeyboardActions(onSend = { onSend() }),
+                                    trailingIcon = {
+                                        IconButton(
+                                            onClick = onSend,
+                                            enabled = typed.isNotBlank()
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Rounded.Send,
+                                                contentDescription = stringResource(R.string.action_send)
+                                            )
+                                        }
                                     }
-                                }
-                            )
+                                )
+
+                                MicButton(
+                                    phase = state.phase,
+                                    level = state.micLevel,
+                                    onClick = onMic,
+                                    buttonSize = 56.dp
+                                )
+                            }
                         }
                     }
                 }
