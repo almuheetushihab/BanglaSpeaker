@@ -1,72 +1,115 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.banglaenglish.speaker.ui.screen.speaker
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Done
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.banglaenglish.speaker.R
 import com.banglaenglish.speaker.data.ConversationItem
+import com.banglaenglish.speaker.data.TranslationStyle
 import com.banglaenglish.speaker.ui.UiText
-import com.banglaenglish.speaker.ui.components.BottomPanel
-import com.banglaenglish.speaker.ui.components.ConversationList
+import com.banglaenglish.speaker.ui.components.AudioVisualizerBars
+import com.banglaenglish.speaker.ui.components.EmptyState
+import com.banglaenglish.speaker.ui.components.MicButton
 import com.banglaenglish.speaker.ui.components.ModelBanner
+import com.banglaenglish.speaker.ui.components.RecordingTimer
+import com.banglaenglish.speaker.ui.components.ShimmerLoadingCard
+import com.banglaenglish.speaker.ui.screen.speaker.components.ConversationCard
+import com.banglaenglish.speaker.ui.screen.speaker.components.EditTranscriptBox
 import com.banglaenglish.speaker.ui.theme.BanglaSpeakerTheme
 
 @Composable
 fun SpeakerScreen(
+    onNavigateToPractice: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SpeakerViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
     val keyboard = LocalSoftwareKeyboardController.current
     var typed by rememberSaveable { mutableStateOf("") }
+
+    // Keep Screen On during dictation
+    DisposableEffect(state.phase) {
+        val window = (context as? Activity)?.window
+        if (state.phase == Phase.Listening) {
+            window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        onDispose {
+            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
             viewModel.onMicTapped()
         } else {
             viewModel.showMessage(UiText.StringResource(R.string.permission_mic_required))
@@ -85,6 +128,7 @@ fun SpeakerScreen(
         val granted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.RECORD_AUDIO
         ) == PackageManager.PERMISSION_GRANTED
+        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         if (granted) {
             viewModel.onMicTapped()
         } else {
@@ -92,7 +136,7 @@ fun SpeakerScreen(
         }
     }
 
-    val send: () -> Unit = {
+    val sendTyped: () -> Unit = {
         if (typed.isNotBlank()) {
             viewModel.translateTyped(typed)
             typed = ""
@@ -105,16 +149,23 @@ fun SpeakerScreen(
         typed = typed,
         snackbarHostState = snackbarHostState,
         onTypedChange = { typed = it },
-        onSend = send,
+        onSend = sendTyped,
         onMic = onMic,
-        onToggleSlow = viewModel::toggleSlowSpeech,
-        onReplay = viewModel::replay,
+        onFinishDictation = viewModel::finishDictation,
+        onStyleSelected = viewModel::selectStyle,
+        onPlay = viewModel::speakItem,
+        onBookmarkToggle = viewModel::toggleBookmark,
+        onPractice = onNavigateToPractice,
         onRetryModel = viewModel::downloadModel,
         onClearConversation = viewModel::clearConversation,
+        onUpdateEditableTranscript = viewModel::updateEditableTranscript,
+        onConfirmEdit = viewModel::confirmEditAndTranslate,
+        onReRecord = viewModel::cancelEditAndReRecord,
         modifier = modifier
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpeakerScreenContent(
     state: SpeakerUiState,
@@ -123,12 +174,26 @@ fun SpeakerScreenContent(
     onTypedChange: (String) -> Unit,
     onSend: () -> Unit,
     onMic: () -> Unit,
-    onToggleSlow: () -> Unit,
-    onReplay: (ConversationItem) -> Unit,
+    onFinishDictation: () -> Unit,
+    onStyleSelected: (ConversationItem, TranslationStyle) -> Unit,
+    onPlay: (ConversationItem) -> Unit,
+    onBookmarkToggle: (ConversationItem) -> Unit,
+    onPractice: (String) -> Unit,
     onRetryModel: () -> Unit,
     onClearConversation: () -> Unit,
+    onUpdateEditableTranscript: (String) -> Unit,
+    onConfirmEdit: () -> Unit,
+    onReRecord: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(state.conversation.size, state.phase) {
+        if (state.conversation.isNotEmpty()) {
+            listState.animateScrollToItem(state.conversation.size - 1)
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -165,9 +230,7 @@ fun SpeakerScreenContent(
                             )
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 )
             }
         ) { padding ->
@@ -181,21 +244,128 @@ fun SpeakerScreenContent(
                     onRetry = onRetryModel
                 )
 
+                // Conversation List / Empty State
                 Box(modifier = Modifier.weight(1f)) {
-                    ConversationList(
-                        state = state,
-                        onReplay = onReplay
+                    if (state.conversation.isEmpty() && state.phase == Phase.Idle) {
+                        EmptyState()
+                    } else {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(
+                                items = state.conversation,
+                                key = { it.id }
+                            ) { item ->
+                                ConversationCard(
+                                    item = item,
+                                    onStyleSelected = { style -> onStyleSelected(item, style) },
+                                    onPlay = { onPlay(item) },
+                                    onBookmarkToggle = { onBookmarkToggle(item) },
+                                    onPractice = { onPractice(item.getActiveEnglishText()) }
+                                )
+                            }
+
+                            if (state.phase == Phase.Translating) {
+                                item(key = "shimmer") {
+                                    ShimmerLoadingCard()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Edit Transcript Box (shown when autoTranslate is OFF)
+                if (state.phase == Phase.EditingTranscript) {
+                    EditTranscriptBox(
+                        transcriptText = state.editableTranscript,
+                        onTranscriptChange = onUpdateEditableTranscript,
+                        onTranslate = onConfirmEdit,
+                        onReRecord = onReRecord,
+                        modifier = Modifier.padding(16.dp)
                     )
                 }
 
-                BottomPanel(
-                    state = state,
-                    typed = typed,
-                    onTypedChange = onTypedChange,
-                    onSend = onSend,
-                    onMic = onMic,
-                    onToggleSlow = onToggleSlow
-                )
+                // Bottom Panel & Dictation Session Controls
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+                    shadowElevation = 12.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Real-time dictation text & visualizer
+                        if (state.phase == Phase.Listening) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RecordingTimer(seconds = state.recordingSeconds)
+                                AudioVisualizerBars(
+                                    level = state.micLevel,
+                                    isDictating = true
+                                )
+                            }
+
+                            val liveDisplay = state.getDisplayTranscript()
+                            Text(
+                                text = liveDisplay.ifBlank { stringResource(R.string.status_listening) },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+
+                            Button(
+                                onClick = onFinishDictation,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(24.dp)
+                            ) {
+                                Icon(imageVector = Icons.Rounded.Done, contentDescription = null)
+                                Text(
+                                    text = stringResource(R.string.action_done),
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        } else if (state.phase != Phase.EditingTranscript) {
+                            // Mic Button & Text Field when Idle
+                            MicButton(
+                                phase = state.phase,
+                                level = state.micLevel,
+                                onClick = onMic
+                            )
+
+                            OutlinedTextField(
+                                value = typed,
+                                onValueChange = onTypedChange,
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = state.phase != Phase.Translating,
+                                singleLine = true,
+                                shape = RoundedCornerShape(28.dp),
+                                placeholder = { Text(stringResource(R.string.text_input_placeholder)) },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                                keyboardActions = KeyboardActions(onSend = { onSend() }),
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = onSend,
+                                        enabled = typed.isNotBlank()
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Rounded.Send,
+                                            contentDescription = stringResource(R.string.action_send)
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -213,10 +383,16 @@ private fun SpeakerScreenPreview() {
             onTypedChange = {},
             onSend = {},
             onMic = {},
-            onToggleSlow = {},
-            onReplay = {},
+            onFinishDictation = {},
+            onStyleSelected = { _, _ -> },
+            onPlay = {},
+            onBookmarkToggle = {},
+            onPractice = {},
             onRetryModel = {},
-            onClearConversation = {}
+            onClearConversation = {},
+            onUpdateEditableTranscript = {},
+            onConfirmEdit = {},
+            onReRecord = {}
         )
     }
 }

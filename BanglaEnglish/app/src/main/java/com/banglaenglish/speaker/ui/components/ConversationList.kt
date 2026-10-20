@@ -10,30 +10,32 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.banglaenglish.speaker.data.ConversationItem
+import com.banglaenglish.speaker.data.TranslationStyle
 import com.banglaenglish.speaker.ui.screen.speaker.SpeakerUiState
 import com.banglaenglish.speaker.ui.theme.BanglaSpeakerTheme
 
 @Composable
 fun ConversationList(
     state: SpeakerUiState,
-    onReplay: (ConversationItem) -> Unit,
+    onStyleSelected: (ConversationItem, TranslationStyle) -> Unit,
+    onPlay: (ConversationItem) -> Unit,
+    onBookmarkToggle: (ConversationItem) -> Unit,
+    onPractice: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
-    val hasPartial = state.partialText.isNotBlank()
 
-    LaunchedEffect(state.conversation.size, hasPartial) {
+    LaunchedEffect(state.conversation.size) {
         val count = listState.layoutInfo.totalItemsCount
         if (count > 0) {
             listState.animateScrollToItem(count - 1)
         }
     }
 
-    if (state.conversation.isEmpty() && !hasPartial) {
+    if (state.conversation.isEmpty()) {
         EmptyState(modifier = modifier)
         return
     }
@@ -50,16 +52,11 @@ fun ConversationList(
         ) { item ->
             ConversationCard(
                 item = item,
-                onReplay = { onReplay(item) }
+                onStyleSelected = { style -> onStyleSelected(item, style) },
+                onPlay = { onPlay(item) },
+                onBookmarkToggle = { onBookmarkToggle(item) },
+                onPractice = { onPractice(item.getActiveEnglishText()) }
             )
-        }
-        if (hasPartial) {
-            item(key = "partial") {
-                BanglaBubble(
-                    text = state.partialText,
-                    modifier = Modifier.alpha(0.6f)
-                )
-            }
         }
     }
 }
@@ -71,7 +68,10 @@ private fun ConversationListEmptyPreview() {
     BanglaSpeakerTheme {
         ConversationList(
             state = SpeakerUiState(),
-            onReplay = {}
+            onStyleSelected = { _, _ -> },
+            onPlay = {},
+            onBookmarkToggle = {},
+            onPractice = {}
         )
     }
 }
@@ -85,12 +85,15 @@ private fun ConversationListPopulatedPreview() {
             state = SpeakerUiState(
                 conversation = listOf(
                     ConversationItem(
-                        bangla = "আমি আজ অফিসে যাব না।",
+                        bangla = "আমি আজ অফিসে যাব না",
                         english = "I will not go to the office today."
                     )
                 )
             ),
-            onReplay = {}
+            onStyleSelected = { _, _ -> },
+            onPlay = {},
+            onBookmarkToggle = {},
+            onPractice = {}
         )
     }
 }

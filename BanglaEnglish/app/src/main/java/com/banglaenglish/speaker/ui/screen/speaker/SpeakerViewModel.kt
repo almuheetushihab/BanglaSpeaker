@@ -7,31 +7,54 @@ import com.banglaenglish.speaker.R
 import com.banglaenglish.speaker.data.ConversationItem
 import com.banglaenglish.speaker.data.SpeechEvent
 import com.banglaenglish.speaker.data.SpeechRecognizerManager
+import com.banglaenglish.speaker.data.TranslationEngineType
 import com.banglaenglish.speaker.data.TranslationRepository
+import com.banglaenglish.speaker.data.TranslationRequest
+import com.banglaenglish.speaker.data.TranslationStyle
 import com.banglaenglish.speaker.data.TtsManager
+import com.banglaenglish.speaker.data.UserPreferencesRepository
+import com.banglaenglish.speaker.data.local.AppDatabase
+import com.banglaenglish.speaker.data.local.ConversationEntity
 import com.banglaenglish.speaker.ui.UiText
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SpeakerViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _state = MutableStateFlow(SpeakerUiState())
     val state: StateFlow<SpeakerUiState> = _state.asStateFlow()
 
+    private val db = AppDatabase.getInstance(application)
+    private val conversationDao = db.conversationDao()
     private val speech = SpeechRecognizerManager(application)
     private val translation = TranslationRepository()
+    private val userPrefsRepo = UserPreferencesRepository(application)
     private val tts = TtsManager(application) { msg -> showMessage(UiText.DynamicString(msg)) }
 
-    private var listenJob: Job? = null
+    private var dictationJob: Job? = null
+    private var timerJob: Job? = null
+    private var isDictatingSessionActive = false
 
     init {
         downloadModel()
 
+        // Load conversation history from Room DB
+        viewModelScope.launch {
+            conversationDao.getAllFlow().collect { entities ->
+                val domainItems = entities.map { it.toDomainModel() }
+                _state.update { it.copy(conversation = domainItems) }
+            }
+        }
+
+        // Observe TTS speaking state
         viewModelScope.launch {
             tts.isSpeaking.collect { speaking ->
                 _state.update {
@@ -48,7 +71,7 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
     fun downloadModel() {
         _state.update { it.copy(modelState = ModelState.Downloading) }
         viewModelScope.launch {
-            runCatching { translation.prepareModel() }
+            runCatching { translation.prepareOfflineModel() }
                 .onSuccess { _state.update { it.copy(modelState = ModelState.Ready) } }
                 .onFailure { _state.update { it.copy(modelState = ModelState.Failed) } }
         }
@@ -56,10 +79,136 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
 
     fun onMicTapped() {
         when (_state.value.phase) {
-            Phase.Listening -> cancelListening()
+            Phase.Listening -> finishDictation()
             Phase.Translating -> Unit
-            else -> startListening()
+            else -> startDictation()
         }
+    }
+
+    private fun startDictation() {
+        if (!speech.isAvailable()) {
+            showMessage(UiText.StringResource(R.string.error_speech_not_available))
+            return
+        }
+
+        tts.stop()
+        dictationJob?.cancel()
+        timerJob?.cancel()
+
+        isDictatingSessionActive = true
+        _state.update {
+            it.copy(
+                phase = Phase.Listening,
+                accumulatedText = "",
+                livePartialText = "",
+                micLevel = 0f,
+                recordingSeconds = 0L
+            )
+        }
+
+        // Timer job
+        timerJob = viewModelScope.launch {
+            while (isDictatingSessionActive) {
+                delay(1000)
+                _state.update { it.copy(recordingSeconds = it.recordingSeconds + 1) }
+            }
+        }
+
+        // Dictation loop
+        dictationJob = viewModelScope.launch {
+            runDictationLoop()
+        }
+    }
+
+    private suspend fun runDictationLoop() {
+        while (isDictatingSessionActive) {
+            speech.listen().collect { event ->
+                when (event) {
+                    SpeechEvent.Ready -> Unit
+                    is SpeechEvent.Level -> _state.update { it.copy(micLevel = event.value) }
+                    is SpeechEvent.Partial -> _state.update { it.copy(livePartialText = event.text) }
+                    is SpeechEvent.FinalChunk -> {
+                        val currentAcc = _state.value.accumulatedText
+                        val updatedAcc = if (currentAcc.isBlank()) event.text else "$currentAcc ${event.text}"
+                        _state.update {
+                            it.copy(
+                                accumulatedText = updatedAcc,
+                                livePartialText = "",
+                                micLevel = 0f
+                            )
+                        }
+                    }
+                    is SpeechEvent.Failure -> {
+                        _state.update { it.copy(livePartialText = "", micLevel = 0f) }
+                        if (!event.isTransientSilence) {
+                            isDictatingSessionActive = false
+                            _state.update {
+                                it.copy(
+                                    phase = Phase.Idle,
+                                    message = UiText.DynamicString(event.message)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (isDictatingSessionActive) {
+                delay(150) // Small delay before silently restarting recognizer loop
+            }
+        }
+    }
+
+    fun finishDictation() {
+        isDictatingSessionActive = false
+        dictationJob?.cancel()
+        timerJob?.cancel()
+
+        val currentState = _state.value
+        val capturedText = currentState.getDisplayTranscript().trim()
+
+        _state.update {
+            it.copy(
+                phase = Phase.Idle,
+                accumulatedText = "",
+                livePartialText = "",
+                micLevel = 0f,
+                recordingSeconds = 0L
+            )
+        }
+
+        if (capturedText.isBlank()) {
+            showMessage(UiText.StringResource(R.string.error_speech_no_match))
+            return
+        }
+
+        val autoTranslate = userPrefsRepo.userPreferences.value.autoTranslate
+        if (autoTranslate) {
+            translateAndSpeak(capturedText)
+        } else {
+            _state.update {
+                it.copy(
+                    phase = Phase.EditingTranscript,
+                    editableTranscript = capturedText
+                )
+            }
+        }
+    }
+
+    fun updateEditableTranscript(text: String) {
+        _state.update { it.copy(editableTranscript = text) }
+    }
+
+    fun confirmEditAndTranslate() {
+        val text = _state.value.editableTranscript.trim()
+        if (text.isBlank()) return
+        _state.update { it.copy(phase = Phase.Idle) }
+        translateAndSpeak(text)
+    }
+
+    fun cancelEditAndReRecord() {
+        _state.update { it.copy(phase = Phase.Idle, editableTranscript = "") }
+        startDictation()
     }
 
     fun translateTyped(text: String) {
@@ -69,12 +218,92 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
         if (phase == Phase.Listening || phase == Phase.Translating) return
 
         tts.stop()
-        listenJob?.cancel()
-        listenJob = viewModelScope.launch { translateAndSpeak(clean) }
+        dictationJob?.cancel()
+        timerJob?.cancel()
+        isDictatingSessionActive = false
+
+        translateAndSpeak(clean)
     }
 
-    fun replay(item: ConversationItem) {
-        tts.speak(item.english, _state.value.slowSpeech)
+    private fun translateAndSpeak(bangla: String) {
+        _state.update { it.copy(phase = Phase.Translating) }
+
+        viewModelScope.launch {
+            val scenario = userPrefsRepo.userPreferences.value.scenario
+            val request = TranslationRequest(
+                banglaText = bangla,
+                history = _state.value.conversation,
+                scenario = scenario
+            )
+
+            runCatching { translation.translate(request) }
+                .onSuccess { result ->
+                    val item = ConversationItem(
+                        bangla = bangla,
+                        correctedBangla = result.correctedBangla,
+                        intent = result.intent,
+                        english = result.english,
+                        englishFormal = result.englishFormal,
+                        englishCasual = result.englishCasual,
+                        tipBn = result.tipBn,
+                        keyPhrases = result.keyPhrases,
+                        engineUsed = result.engineUsed
+                    )
+
+                    // Insert into Room DB
+                    val id = withContext(Dispatchers.IO) {
+                        conversationDao.insert(ConversationEntity.fromDomainModel(item))
+                    }
+                    val savedItem = item.copy(id = id)
+
+                    _state.update {
+                        it.copy(
+                            phase = Phase.Idle,
+                            editableTranscript = ""
+                        )
+                    }
+
+                    // Inform engine used if ML Kit fallback was used
+                    if (result.engineUsed == TranslationEngineType.ML_KIT) {
+                        showMessage(UiText.StringResource(R.string.engine_mlkit))
+                    }
+
+                    // Speak natural English translation
+                    speakItem(savedItem)
+                }
+                .onFailure { e ->
+                    if (e is CancellationException) throw e
+                    _state.update {
+                        it.copy(
+                            phase = Phase.Idle,
+                            message = UiText.StringResource(R.string.error_translation_failed)
+                        )
+                    }
+                }
+        }
+    }
+
+    fun selectStyle(item: ConversationItem, style: TranslationStyle) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val updated = item.copy(selectedStyle = style)
+            conversationDao.update(ConversationEntity.fromDomainModel(updated))
+            withContext(Dispatchers.Main) {
+                speakItem(updated)
+            }
+        }
+    }
+
+    fun toggleBookmark(item: ConversationItem) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val updated = item.copy(isBookmarked = !item.isBookmarked)
+            conversationDao.update(ConversationEntity.fromDomainModel(updated))
+        }
+    }
+
+    fun speakItem(item: ConversationItem) {
+        val textToSpeak = item.getActiveEnglishText()
+        val prefs = userPrefsRepo.userPreferences.value
+        tts.speak(textToSpeak, prefs.speechSpeed, prefs.accent)
     }
 
     fun toggleSlowSpeech() {
@@ -83,7 +312,9 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
 
     fun clearConversation() {
         tts.stop()
-        _state.update { it.copy(conversation = emptyList()) }
+        viewModelScope.launch(Dispatchers.IO) {
+            conversationDao.deleteAll()
+        }
     }
 
     fun showMessage(message: UiText) {
@@ -94,64 +325,10 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
         _state.update { it.copy(message = null) }
     }
 
-    private fun startListening() {
-        if (!speech.isAvailable()) {
-            showMessage(UiText.StringResource(R.string.error_speech_not_available))
-            return
-        }
-        tts.stop()
-        listenJob?.cancel()
-        _state.update { it.copy(phase = Phase.Listening, partialText = "", micLevel = 0f) }
-
-        listenJob = viewModelScope.launch {
-            speech.listen().collect { event ->
-                when (event) {
-                    SpeechEvent.Ready -> Unit
-                    is SpeechEvent.Level -> _state.update { it.copy(micLevel = event.value) }
-                    is SpeechEvent.Partial -> _state.update { it.copy(partialText = event.text) }
-                    is SpeechEvent.Final -> {
-                        _state.update { it.copy(partialText = "", micLevel = 0f) }
-                        translateAndSpeak(event.text)
-                    }
-                    is SpeechEvent.Failure -> _state.update {
-                        it.copy(
-                            phase = Phase.Idle,
-                            partialText = "",
-                            micLevel = 0f,
-                            message = UiText.DynamicString(event.message)
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    private fun cancelListening() {
-        listenJob?.cancel()
-        _state.update { it.copy(phase = Phase.Idle, partialText = "", micLevel = 0f) }
-    }
-
-    private suspend fun translateAndSpeak(bangla: String) {
-        _state.update { it.copy(phase = Phase.Translating) }
-        runCatching { translation.translate(bangla) }
-            .onSuccess { english ->
-                val item = ConversationItem(bangla = bangla, english = english)
-                _state.update { it.copy(phase = Phase.Idle, conversation = it.conversation + item) }
-                tts.speak(english, _state.value.slowSpeech)
-            }
-            .onFailure { e ->
-                if (e is CancellationException) throw e
-                _state.update {
-                    it.copy(
-                        phase = Phase.Idle,
-                        message = UiText.StringResource(R.string.error_translation_failed)
-                    )
-                }
-            }
-    }
-
     override fun onCleared() {
-        listenJob?.cancel()
+        isDictatingSessionActive = false
+        dictationJob?.cancel()
+        timerJob?.cancel()
         tts.shutdown()
         translation.close()
         super.onCleared()

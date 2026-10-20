@@ -1,30 +1,34 @@
 package com.banglaenglish.speaker.data
 
-import com.google.mlkit.common.model.DownloadConditions
-import com.google.mlkit.nl.translate.TranslateLanguage
-import com.google.mlkit.nl.translate.Translation
-import com.google.mlkit.nl.translate.Translator
-import com.google.mlkit.nl.translate.TranslatorOptions
-import kotlinx.coroutines.tasks.await
+import com.banglaenglish.speaker.BuildConfig
+import kotlinx.coroutines.CancellationException
 
-/** Bangla -> English using Google ML Kit (free, on-device after the first model download). */
-class TranslationRepository {
+class TranslationRepository(
+    private val geminiEngine: GeminiTranslationEngine = GeminiTranslationEngine(),
+    private val mlKitEngine: MlKitTranslationEngine = MlKitTranslationEngine()
+) {
 
-    private val translator: Translator = Translation.getClient(
-        TranslatorOptions.Builder()
-            .setSourceLanguage(TranslateLanguage.BENGALI)
-            .setTargetLanguage(TranslateLanguage.ENGLISH)
-            .build()
-    )
-
-    suspend fun prepareModel() {
-        translator.downloadModelIfNeeded(DownloadConditions.Builder().build()).await()
+    suspend fun prepareOfflineModel() {
+        mlKitEngine.prepareModel()
     }
 
-    suspend fun translate(bangla: String): String {
-        prepareModel()
-        return translator.translate(bangla).await()
+    suspend fun translate(request: TranslationRequest): TranslationResult {
+        // Try Gemini AI first if key is configured
+        if (BuildConfig.GEMINI_API_KEY.isNotBlank()) {
+            try {
+                return geminiEngine.translate(request)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Gemini API failed, fall back silently to ML Kit
+            }
+        }
+
+        // Offline fallback using ML Kit
+        return mlKitEngine.translate(request)
     }
 
-    fun close() = translator.close()
+    fun close() {
+        mlKitEngine.close()
+    }
 }

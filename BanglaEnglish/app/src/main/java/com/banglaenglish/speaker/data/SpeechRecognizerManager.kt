@@ -16,13 +16,13 @@ sealed interface SpeechEvent {
     data object Ready : SpeechEvent
     data class Level(val value: Float) : SpeechEvent      // 0f..1f
     data class Partial(val text: String) : SpeechEvent
-    data class Final(val text: String) : SpeechEvent
-    data class Failure(val message: String) : SpeechEvent
+    data class FinalChunk(val text: String) : SpeechEvent
+    data class Failure(val message: String, val isTransientSilence: Boolean) : SpeechEvent
 }
 
 /**
  * Wraps Android's SpeechRecognizer as a cold Flow.
- * Collect it to start listening, cancel the collector to stop.
+ * Emits events including RMS level, partial text, final speech chunks, and errors.
  */
 class SpeechRecognizerManager(private val context: Context) {
 
@@ -52,16 +52,19 @@ class SpeechRecognizerManager(private val context: Context) {
                 val text = results
                     ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     ?.firstOrNull().orEmpty()
-                if (text.isBlank()) {
-                    trySend(SpeechEvent.Failure("কিছু শুনতে পাইনি। আবার চেষ্টা করুন।"))
+                if (text.isNotBlank()) {
+                    trySend(SpeechEvent.FinalChunk(text))
                 } else {
-                    trySend(SpeechEvent.Final(text))
+                    trySend(SpeechEvent.Failure("কিছু শুনতে পাইনি।", isTransientSilence = true))
                 }
                 close()
             }
 
             override fun onError(error: Int) {
-                trySend(SpeechEvent.Failure(errorToMessage(error)))
+                val isTransient = error == SpeechRecognizer.ERROR_NO_MATCH ||
+                        error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT ||
+                        error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY
+                trySend(SpeechEvent.Failure(errorToMessage(error), isTransientSilence = isTransient))
                 close()
             }
 
@@ -76,7 +79,13 @@ class SpeechRecognizerManager(private val context: Context) {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+
+            // Length hints to prevent cutting off early
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 2500L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 5000L)
         }
+
         recognizer.startListening(intent)
 
         awaitClose { recognizer.destroy() }
@@ -84,14 +93,14 @@ class SpeechRecognizerManager(private val context: Context) {
 
     private fun errorToMessage(error: Int): String = when (error) {
         SpeechRecognizer.ERROR_NO_MATCH,
-        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "কিছু শুনতে পাইনি। আবার চেষ্টা করুন।"
+        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "কিছু শুনতে পাইনি। আবার কথা বলুন।"
 
         SpeechRecognizer.ERROR_NETWORK,
         SpeechRecognizer.ERROR_NETWORK_TIMEOUT,
-        SpeechRecognizer.ERROR_SERVER -> "ইন্টারনেট সংযোগ চেক করুন (বাংলা শোনার জন্য লাগতে পারে)।"
+        SpeechRecognizer.ERROR_SERVER -> "ইন্টারনেট সংযোগ চেক করুন।"
 
         SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "মাইক্রোফোনের অনুমতি দিন।"
-        SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "রিকগনাইজার ব্যস্ত, একটু পরে চেষ্টা করুন।"
+        SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "রিকগনাইজার ব্যস্ত, পুনঃচেষ্টা করা হচ্ছে..."
         SpeechRecognizer.ERROR_AUDIO -> "অডিও রেকর্ড করতে সমস্যা হয়েছে।"
         12, 13 -> "এই ফোনে বাংলা ভয়েস সাপোর্ট নেই। Google অ্যাপ আপডেট করুন।"
         else -> "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।"

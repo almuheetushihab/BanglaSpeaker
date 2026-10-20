@@ -1,6 +1,5 @@
 package com.banglaenglish.speaker.ui.components
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,12 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.banglaenglish.speaker.R
 import com.banglaenglish.speaker.ui.screen.speaker.Phase
 import com.banglaenglish.speaker.ui.screen.speaker.SpeakerUiState
-import com.banglaenglish.speaker.ui.theme.BanglaSpeakerTheme
 
 @Composable
 fun BottomPanel(
@@ -46,6 +43,7 @@ fun BottomPanel(
     val statusText = when (state.phase) {
         Phase.Idle -> stringResource(R.string.status_idle)
         Phase.Listening -> stringResource(R.string.status_listening)
+        Phase.EditingTranscript -> stringResource(R.string.status_editing)
         Phase.Translating -> stringResource(R.string.status_translating)
         Phase.Speaking -> stringResource(R.string.status_speaking)
     }
@@ -57,12 +55,7 @@ fun BottomPanel(
         modifier = modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(
-                start = 16.dp,
-                end = 16.dp,
-                top = 12.dp,
-                bottom = 12.dp
-            ),
+            modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -119,21 +112,5 @@ fun BottomPanel(
                 }
             )
         }
-    }
-}
-
-@Preview(name = "Light Mode", showBackground = true)
-@Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
-@Composable
-private fun BottomPanelPreview() {
-    BanglaSpeakerTheme {
-        BottomPanel(
-            state = SpeakerUiState(),
-            typed = "",
-            onTypedChange = {},
-            onSend = {},
-            onMic = {},
-            onToggleSlow = {}
-        )
     }
 }
