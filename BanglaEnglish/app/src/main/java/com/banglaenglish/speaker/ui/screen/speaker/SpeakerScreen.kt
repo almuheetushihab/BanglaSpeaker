@@ -7,7 +7,7 @@ import android.content.res.Configuration
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,8 +31,6 @@ import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +40,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -51,7 +50,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -66,17 +64,23 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.banglaenglish.speaker.R
+import com.banglaenglish.speaker.data.AppLanguage
 import com.banglaenglish.speaker.data.ConversationItem
+import com.banglaenglish.speaker.data.ConversationScenario
 import com.banglaenglish.speaker.data.TranslationStyle
 import com.banglaenglish.speaker.ui.UiText
+import com.banglaenglish.speaker.ui.components.AppChip
 import com.banglaenglish.speaker.ui.components.AudioVisualizerBars
 import com.banglaenglish.speaker.ui.components.EmptyState
 import com.banglaenglish.speaker.ui.components.MicButton
 import com.banglaenglish.speaker.ui.components.ModelBanner
 import com.banglaenglish.speaker.ui.components.RecordingTimer
+import com.banglaenglish.speaker.ui.components.ScreenBackground
 import com.banglaenglish.speaker.ui.components.ShimmerLoadingCard
+import com.banglaenglish.speaker.ui.components.TopBarHeader
 import com.banglaenglish.speaker.ui.screen.speaker.components.ConversationCard
 import com.banglaenglish.speaker.ui.screen.speaker.components.EditTranscriptBox
+import com.banglaenglish.speaker.ui.theme.AppTheme
 import com.banglaenglish.speaker.ui.theme.BanglaSpeakerTheme
 
 @Composable
@@ -86,6 +90,7 @@ fun SpeakerScreen(
     viewModel: SpeakerViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val prefs by viewModel.userPreferences.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -147,7 +152,11 @@ fun SpeakerScreen(
     SpeakerScreenContent(
         state = state,
         typed = typed,
+        selectedScenario = prefs.scenario,
+        currentLanguage = prefs.language,
         snackbarHostState = snackbarHostState,
+        onScenarioSelected = viewModel::setScenario,
+        onLanguageToggle = viewModel::setLanguage,
         onTypedChange = { typed = it },
         onSend = sendTyped,
         onMic = onMic,
@@ -161,16 +170,20 @@ fun SpeakerScreen(
         onUpdateEditableTranscript = viewModel::updateEditableTranscript,
         onConfirmEdit = viewModel::confirmEditAndTranslate,
         onReRecord = viewModel::cancelEditAndReRecord,
+        onExampleClick = { example -> viewModel.translateTyped(example) },
         modifier = modifier
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpeakerScreenContent(
     state: SpeakerUiState,
     typed: String,
+    selectedScenario: ConversationScenario,
+    currentLanguage: AppLanguage,
     snackbarHostState: SnackbarHostState,
+    onScenarioSelected: (ConversationScenario) -> Unit,
+    onLanguageToggle: (AppLanguage) -> Unit,
     onTypedChange: (String) -> Unit,
     onSend: () -> Unit,
     onMic: () -> Unit,
@@ -184,6 +197,7 @@ fun SpeakerScreenContent(
     onUpdateEditableTranscript: (String) -> Unit,
     onConfirmEdit: () -> Unit,
     onReRecord: () -> Unit,
+    onExampleClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
@@ -194,31 +208,17 @@ fun SpeakerScreenContent(
         }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
-                        MaterialTheme.colorScheme.background
-                    )
-                )
-            )
-    ) {
+    ScreenBackground(modifier = modifier) {
         Scaffold(
             containerColor = Color.Transparent,
             contentWindowInsets = WindowInsets.safeDrawing,
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = stringResource(R.string.top_app_bar_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    },
+                TopBarHeader(
+                    title = stringResource(R.string.top_app_bar_title),
+                    subtitle = stringResource(R.string.top_app_bar_subtitle),
+                    currentLanguage = currentLanguage,
+                    onLanguageToggle = onLanguageToggle,
                     actions = {
                         IconButton(
                             onClick = onClearConversation,
@@ -226,11 +226,11 @@ fun SpeakerScreenContent(
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Delete,
-                                contentDescription = stringResource(R.string.action_clear_conversation_desc)
+                                contentDescription = stringResource(R.string.action_clear_conversation_desc),
+                                tint = Color.White
                             )
                         }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                    }
                 )
             }
         ) { padding ->
@@ -239,15 +239,71 @@ fun SpeakerScreenContent(
                     .padding(padding)
                     .fillMaxSize()
             ) {
+                // Model Download / Error Banner
                 ModelBanner(
                     modelState = state.modelState,
                     onRetry = onRetryModel
                 )
 
+                // Top Horizontal Scenario Chips Bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ConversationScenario.entries.forEach { scenario ->
+                        AppChip(
+                            selected = scenario == selectedScenario,
+                            onClick = { onScenarioSelected(scenario) },
+                            label = stringResource(scenario.labelRes),
+                            selectedBrush = AppTheme.colors.primaryGradient
+                        )
+                    }
+                }
+
+                // Phase Status Chip
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val statusText = when (state.phase) {
+                        Phase.Idle -> stringResource(R.string.status_ready)
+                        Phase.Listening -> stringResource(R.string.status_listening)
+                        Phase.Translating -> stringResource(R.string.status_translating)
+                        Phase.Speaking -> stringResource(R.string.status_speaking)
+                        Phase.EditingTranscript -> stringResource(R.string.status_editing)
+                    }
+
+                    val statusColor = when (state.phase) {
+                        Phase.Idle -> AppTheme.colors.intentStatement
+                        Phase.Listening -> AppTheme.colors.intentCommand
+                        Phase.Translating -> AppTheme.colors.intentQuestion
+                        Phase.Speaking -> AppTheme.colors.intentAnswer
+                        Phase.EditingTranscript -> AppTheme.colors.intentRequest
+                    }
+
+                    Surface(
+                        shape = CircleShape,
+                        color = statusColor.copy(alpha = 0.18f)
+                    ) {
+                        Text(
+                            text = statusText,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = statusColor,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+
                 // Conversation List / Empty State
                 Box(modifier = Modifier.weight(1f)) {
                     if (state.conversation.isEmpty() && state.phase == Phase.Idle) {
-                        EmptyState()
+                        EmptyState(onExampleClick = onExampleClick)
                     } else {
                         LazyColumn(
                             state = listState,
@@ -290,9 +346,9 @@ fun SpeakerScreenContent(
 
                 // Bottom Panel & Dictation Session Controls
                 Surface(
-                    color = MaterialTheme.colorScheme.surface,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
                     shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                    shadowElevation = 12.dp,
+                    shadowElevation = 16.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -325,7 +381,7 @@ fun SpeakerScreenContent(
                             Button(
                                 onClick = onFinishDictation,
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(24.dp)
+                                shape = CircleShape
                             ) {
                                 Icon(imageVector = Icons.Rounded.Done, contentDescription = null)
                                 Text(
@@ -347,7 +403,7 @@ fun SpeakerScreenContent(
                                 modifier = Modifier.fillMaxWidth(),
                                 enabled = state.phase != Phase.Translating,
                                 singleLine = true,
-                                shape = RoundedCornerShape(28.dp),
+                                shape = CircleShape,
                                 placeholder = { Text(stringResource(R.string.text_input_placeholder)) },
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                                 keyboardActions = KeyboardActions(onSend = { onSend() }),
@@ -379,7 +435,11 @@ private fun SpeakerScreenPreview() {
         SpeakerScreenContent(
             state = SpeakerUiState(),
             typed = "",
+            selectedScenario = ConversationScenario.CASUAL_CHAT,
+            currentLanguage = AppLanguage.BANGLA,
             snackbarHostState = remember { SnackbarHostState() },
+            onScenarioSelected = {},
+            onLanguageToggle = {},
             onTypedChange = {},
             onSend = {},
             onMic = {},
@@ -392,7 +452,8 @@ private fun SpeakerScreenPreview() {
             onClearConversation = {},
             onUpdateEditableTranscript = {},
             onConfirmEdit = {},
-            onReRecord = {}
+            onReRecord = {},
+            onExampleClick = {}
         )
     }
 }

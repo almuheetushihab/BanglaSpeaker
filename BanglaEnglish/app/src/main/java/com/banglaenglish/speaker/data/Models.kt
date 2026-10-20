@@ -87,6 +87,19 @@ enum class AppTheme(@param:StringRes val labelRes: Int, val rawValue: String) {
     }
 }
 
+/** Application UI language selection. */
+enum class AppLanguage(@param:StringRes val labelRes: Int, val rawValue: String, val localeCode: String) {
+    SYSTEM(R.string.lang_system, "System", ""),
+    ENGLISH(R.string.lang_english, "English", "en"),
+    BANGLA(R.string.lang_bangla, "বাংলা", "bn");
+
+    companion object {
+        fun fromRawValue(value: String): AppLanguage {
+            return entries.find { it.rawValue.equals(value, ignoreCase = true) } ?: SYSTEM
+        }
+    }
+}
+
 /** Roleplay conversation turn senders. */
 enum class RoleplaySender {
     AI, USER
@@ -134,7 +147,8 @@ data class ConversationItem(
 data class TranslationRequest(
     val banglaText: String,
     val history: List<ConversationItem> = emptyList(),
-    val scenario: ConversationScenario = ConversationScenario.CASUAL_CHAT
+    val scenario: ConversationScenario = ConversationScenario.CASUAL_CHAT,
+    val appLanguageCode: String = "bn"
 )
 
 /** Result output from translation engine. */

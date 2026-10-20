@@ -1,127 +1,141 @@
 <resources>
-    <string name="app_name">Bangla Speaker</string>
-    <string name="top_app_bar_title">বাংলা → English</string>
-    <string name="action_clear_conversation">মুছে ফেলুন</string>
-    <string name="action_clear_conversation_desc">কথোপকথন মুছে ফেলুন</string>
-    <string name="permission_mic_required">মাইক্রোফোনের অনুমতি ছাড়া বাংলা শোনা সম্ভব নয়।</string>
+    <string name="app_name">BanglaSpeaker</string>
+    <string name="top_app_bar_title">Bangla → English</string>
+    <string name="top_app_bar_subtitle">AI Spoken Translator</string>
+    <string name="action_clear_conversation">Clear</string>
+    <string name="action_clear_conversation_desc">Clear conversation history</string>
+    <string name="permission_mic_required">Microphone permission is required to listen to Bangla speech.</string>
 
     <!-- Navigation Tabs -->
-    <string name="nav_speak">কথা বলুন</string>
-    <string name="nav_history">ইতিহাস</string>
-    <string name="nav_practice">প্র্যাকটিস</string>
-    <string name="nav_settings">সেটিংস</string>
+    <string name="nav_speak">Speak</string>
+    <string name="nav_history">History</string>
+    <string name="nav_practice">Practice</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Language Quick Toggle -->
+    <string name="lang_english_short">EN</string>
+    <string name="lang_bangla_short">বাং</string>
 
     <!-- Empty State -->
-    <string name="empty_state_title">বাংলায় বলুন, ইংরেজিতে শুনুন</string>
-    <string name="empty_state_description">মাইক্রোফোনে ট্যাপ করে কথা বলুন। কথা শেষ হলে Done চাপুন। অ্যাপ ইংরেজিতে অনুবাদ করে শোনাবে।</string>
-    <string name="example_label">উদাহরণ</string>
-    <string name="example_bangla">আমি আজ অফিসে যাব না।</string>
-    <string name="example_english">I will not go to the office today.</string>
+    <string name="empty_state_title">Speak in Bangla, Listen in English</string>
+    <string name="empty_state_description">Tap the mic button and speak in Bangla. When finished, tap Done. The app will translate and speak it in English.</string>
+    <string name="example_label">Try saying:</string>
+    <string name="example_1">আমি আজ অফিসে যাব না।</string>
+    <string name="example_2">এই জামাটার দাম কত?</string>
+    <string name="example_3">আমার একটি হোটেল রুম বুক করা দরকার।</string>
 
     <!-- Model & Engine Banners -->
-    <string name="model_downloading">প্রথমবার অফলাইন অনুবাদের মডেল (~৩০ MB) ডাউনলোড হচ্ছে...</string>
-    <string name="model_download_failed">মডেল ডাউনলোড হয়নি। ইন্টারনেট চেক করুন।</string>
-    <string name="action_retry">আবার চেষ্টা</string>
-    <string name="engine_gemini">Gemini AI (অনলাইন)</string>
-    <string name="engine_mlkit">ML Kit (অফলাইন)</string>
+    <string name="model_downloading">Downloading offline translation model (~30 MB)...</string>
+    <string name="model_download_failed">Failed to download offline model. Check your internet connection.</string>
+    <string name="action_retry">Retry</string>
+    <string name="engine_gemini">Gemini AI (Online)</string>
+    <string name="engine_mlkit">ML Kit (Offline)</string>
 
     <!-- Dictation & Bottom Panel -->
-    <string name="status_idle">মাইক্রোফোনে ট্যাপ করে বাংলায় বলুন</string>
-    <string name="status_listening">শুনছি… কথা বলা শেষে Done চাপুন</string>
-    <string name="status_translating">ইংরেজিতে অনুবাদ করছি…</string>
-    <string name="status_speaking">ইংরেজিতে শোনাচ্ছি…</string>
-    <string name="status_editing">অনুবাদ করার আগে বাংলা সঠিক করে নিন</string>
-    <string name="chip_slow_speech">ধীরে বলো</string>
-    <string name="text_input_placeholder">অথবা বাংলায় টাইপ করুন…</string>
-    <string name="action_done">Done (অনুবাদ)</string>
-    <string name="action_rerecord">আবার রেকর্ড</string>
-    <string name="action_translate">অনুবাদ করুন</string>
+    <string name="status_ready">Ready: Tap mic to speak</string>
+    <string name="status_idle">Tap the microphone and speak in Bangla</string>
+    <string name="status_listening">Listening… Tap Done when finished</string>
+    <string name="status_translating">Translating into English…</string>
+    <string name="status_speaking">Speaking in English…</string>
+    <string name="status_editing">Review and edit Bangla transcript before translation</string>
+    <string name="chip_slow_speech">Slow Speech</string>
+    <string name="text_input_placeholder">Or type in Bangla here…</string>
+    <string name="action_done">Done (Translate)</string>
+    <string name="action_rerecord">Re-record</string>
+    <string name="action_translate">Translate</string>
 
     <!-- Conversation Card Actions & Tabs -->
     <string name="style_natural">Natural</string>
     <string name="style_formal">Formal</string>
     <string name="style_casual">Casual</string>
-    <string name="action_send">পাঠান</string>
-    <string name="action_play">শুনুন</string>
-    <string name="action_copy">কপি</string>
-    <string name="action_share">শেয়ার</string>
-    <string name="action_bookmark">সেভ</string>
-    <string name="action_practice_sentence">প্র্যাকটিস</string>
-    <string name="label_key_phrases">জরুরি বাক্য/শব্দ:</string>
+    <string name="action_send">Send</string>
+    <string name="action_play">Listen</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_share">Share</string>
+    <string name="action_bookmark">Save</string>
+    <string name="action_practice_sentence">Practice</string>
+    <string name="label_key_phrases">Key Phrases:</string>
+    <string name="label_tip">Pro Tip:</string>
 
     <!-- Intent Labels -->
-    <string name="intent_question">প্রশ্ন</string>
-    <string name="intent_answer">উত্তর</string>
-    <string name="intent_statement">বক্তব্য</string>
-    <string name="intent_request">অনুরোধ</string>
-    <string name="intent_command">আদেশ</string>
-    <string name="intent_greeting">শুভেচ্ছা</string>
-    <string name="intent_other">অন্যান্য</string>
+    <string name="intent_question">Question</string>
+    <string name="intent_answer">Answer</string>
+    <string name="intent_statement">Statement</string>
+    <string name="intent_request">Request</string>
+    <string name="intent_command">Command</string>
+    <string name="intent_greeting">Greeting</string>
+    <string name="intent_other">Other</string>
 
     <!-- Scenarios -->
-    <string name="scenario_casual">Casual chat</string>
-    <string name="scenario_office">Office/Tech meeting</string>
-    <string name="scenario_interview">Job interview</string>
+    <string name="scenario_casual">Casual Chat</string>
+    <string name="scenario_office">Office/Tech</string>
+    <string name="scenario_interview">Job Interview</string>
     <string name="scenario_travel">Travel</string>
     <string name="scenario_shopping">Shopping</string>
     <string name="scenario_study">Study</string>
 
-    <!-- Accents & Themes -->
+    <!-- Accents, Themes & Languages -->
     <string name="accent_us">US Accent 🇺🇸</string>
     <string name="accent_uk">UK Accent 🇬🇧</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="lang_system">System Default</string>
+    <string name="lang_english">English</string>
+    <string name="lang_bangla">বাংলা</string>
 
     <!-- History Screen -->
-    <string name="history_title">ইতিহাস ও সেভ করা বাক্য</string>
-    <string name="search_placeholder">ইতিহাস খুঁজুন…</string>
-    <string name="tab_all_history">সব ইতিহাস</string>
-    <string name="tab_saved_phrases">সেভ করা বাক্য</string>
-    <string name="empty_history">কোন ইতিহাস পাওয়া যায়নি</string>
-    <string name="empty_saved">কোন সেভ করা বাক্য নেই</string>
-    <string name="dialog_clear_title">ইতিহাস মুছে ফেলবেন?</string>
-    <string name="dialog_clear_message">সমস্ত কথোপকথনের ইতিহাস স্থায়ীভাবে মুছে যাবে।</string>
-    <string name="action_cancel">বাতিল</string>
-    <string name="action_delete">মুছে ফেলুন</string>
+    <string name="history_title">History &amp; Saved</string>
+    <string name="search_placeholder">Search history…</string>
+    <string name="tab_all_history">All History</string>
+    <string name="tab_saved_phrases">Saved Phrases</string>
+    <string name="empty_history">No history items found</string>
+    <string name="empty_saved">No saved phrases yet</string>
+    <string name="dialog_clear_title">Clear History?</string>
+    <string name="dialog_clear_message">All conversation items will be permanently deleted.</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
 
     <!-- Settings Screen -->
-    <string name="settings_title">অ্যাপ সেটিংস</string>
-    <string name="setting_scenario_title">কথোপকথনের ধরন (Scenario)</string>
-    <string name="setting_auto_translate_title">Done চাপার পর অটো-অনুবাদ</string>
-    <string name="setting_auto_translate_desc">কথা বলা শেষে সরাসরি অনুবাদ করবে। বন্ধ থাকলে এডিট করার সুযোগ পাবেন।</string>
-    <string name="setting_accent_title">English Accent (উচ্চারণ)</string>
-    <string name="setting_speech_speed_title">কথা বলার গতি (Speed)</string>
-    <string name="setting_theme_title">থিম (Theme)</string>
-    <string name="setting_gemini_key_title">Gemini API Key স্ট্যাটাস</string>
-    <string name="gemini_key_configured">সংযুক্ত আছে (Gemini AI প্রাইমারি)</string>
-    <string name="gemini_key_missing">সংযুক্ত নেই (ML Kit অফলাইন ব্যবহার হচ্ছে)</string>
+    <string name="settings_title">Settings</string>
+    <string name="setting_language_title">App Language</string>
+    <string name="setting_scenario_title">Conversation Scenario</string>
+    <string name="setting_auto_translate_title">Auto-translate on Done</string>
+    <string name="setting_auto_translate_desc">Automatically translates as soon as speech ends. Turn off to edit text first.</string>
+    <string name="setting_accent_title">English Accent</string>
+    <string name="setting_speech_speed_title">Speech Speed</string>
+    <string name="setting_theme_title">Appearance / Theme</string>
+    <string name="setting_gemini_key_title">Gemini AI Status</string>
+    <string name="setting_about_title">About BanglaSpeaker</string>
+    <string name="setting_about_desc">Bilingual English-Bangla interpreter powered by Gemini AI and Android Speech Recognition.</string>
+    <string name="gemini_key_configured">Connected (Gemini AI Primary)</string>
+    <string name="gemini_key_missing">Not set (Fallback to ML Kit Offline)</string>
 
     <!-- Practice Mode -->
-    <string name="practice_title">প্র্যাকটিস ও স্পোকেন টেস্ট</string>
-    <string name="streak_title">🔥 %d দিনের প্র্যাকটিস স্ট্রীক!</string>
+    <string name="practice_title">Practice Hub</string>
+    <string name="streak_title">🔥 %1$d Day Streak!</string>
     <string name="tab_repeat_after_me">Repeat After Me</string>
     <string name="tab_roleplay">AI Role-Play</string>
     <string name="tab_vocabulary">Vocabulary Notebook</string>
-    <string name="repeat_instruction">নিচের বাক্যটি শুনুন এবং নিজের মুখে বলে প্র্যাকটিস করুন:</string>
-    <string name="repeat_listen">প্রথমে শুনুন</string>
-    <string name="repeat_record">আপনার চেষ্টা রেকর্ড করুন</string>
-    <string name="repeat_score">স্কোর: %d%%</string>
-    <string name="practice_recorded_label">রেকর্ড করা হয়েছে: %s</string>
-    <string name="roleplay_select_scenario">রোল-প্লে বেছে নিন:</string>
-    <string name="roleplay_input_placeholder">বাংলায় উত্তর দিন...</string>
-    <string name="vocab_due_count">আজ %d টি শব্দ রিভিশন দেওয়ার সময় হয়েছে</string>
-    <string name="empty_vocab">কোন Vocabulary সেভ করা নেই। অনুবাদের সময় জরুরি বাক্যগুলো সেভ করুন!</string>
-    <string name="vocab_flip">উত্তর দেখুন</string>
-    <string name="vocab_easy">সহজ (+৩ দিন)</string>
-    <string name="vocab_medium">মাঝারি (+১ দিন)</string>
-    <string name="vocab_hard">কঠিন (আজই)</string>
+    <string name="repeat_instruction">Listen to the target sentence and speak it aloud:</string>
+    <string name="repeat_listen">Listen First</string>
+    <string name="repeat_record">Tap to Record Attempt</string>
+    <string name="repeat_score">Accuracy Score: %1$d%%</string>
+    <string name="practice_recorded_label">Recorded Attempt: %1$s</string>
+    <string name="roleplay_select_scenario">Select Role-Play Scenario:</string>
+    <string name="roleplay_input_placeholder">Reply in Bangla or English…</string>
+    <string name="vocab_due_count">%1$d words due for review today</string>
+    <string name="empty_vocab">No vocabulary cards saved yet. Save key phrases during translation!</string>
+    <string name="vocab_flip">Flip Card</string>
+    <string name="vocab_easy">Easy (+3d)</string>
+    <string name="vocab_medium">Medium (+1d)</string>
+    <string name="vocab_hard">Hard (Today)</string>
 
     <!-- Errors & Actions -->
-    <string name="action_stop">থামুন</string>
-    <string name="action_speak">বলুন</string>
-    <string name="error_speech_not_available">এই ফোনে Speech Recognition নেই। Google অ্যাপ ইনস্টল/আপডেট করুন।</string>
-    <string name="error_speech_no_match">কিছু শুনতে পাইনি। আবার কথা বলুন।</string>
-    <string name="error_translation_failed">অনুবাদ করা যায়নি। ML Kit অফলাইন থেকে চেষ্টা করা হচ্ছে।</string>
-    <string name="copied_to_clipboard">কপি করা হয়েছে!</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_speak">Speak</string>
+    <string name="error_speech_not_available">Speech recognition is not available on this device. Please install/update Google app.</string>
+    <string name="error_speech_no_match">Could not recognize speech. Please try again.</string>
+    <string name="error_translation_failed">Translation failed. Trying offline ML Kit model…</string>
+    <string name="copied_to_clipboard">Copied to clipboard!</string>
 </resources>

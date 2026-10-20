@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.banglaenglish.speaker.BuildConfig
+import com.banglaenglish.speaker.data.AppLanguage
 import com.banglaenglish.speaker.data.AppTheme
 import com.banglaenglish.speaker.data.ConversationScenario
 import com.banglaenglish.speaker.data.UserPreferences
@@ -44,6 +45,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setAccent(accent: VoiceAccent) = userPrefsRepo.setAccent(accent)
     fun setSpeechSpeed(speed: Float) = userPrefsRepo.setSpeechSpeed(speed)
     fun setTheme(theme: AppTheme) = userPrefsRepo.setTheme(theme)
+    fun setLanguage(language: AppLanguage) = userPrefsRepo.setLanguage(language)
 
     fun showClearConfirmation(show: Boolean) {
         _state.update { it.copy(showClearConfirmation = show) }

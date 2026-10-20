@@ -50,6 +50,7 @@ class GeminiTranslationEngine(
 
     private fun executeApiCall(requestPayload: TranslationRequest): TranslationResult {
         val url = "https://generativelanguage.googleapis.com/v1beta/models/$MODEL_NAME:generateContent?key=$apiKey"
+        val langName = if (requestPayload.appLanguageCode.equals("en", ignoreCase = true)) "English" else "Bangla"
 
         val systemInstructionText = """
             You are an expert Bangla-to-English interpreter helping a Bangladeshi learner speak fluent, natural English.
@@ -65,7 +66,7 @@ class GeminiTranslationEngine(
               "english": "natural fluent English version",
               "english_formal": "formal polite English version",
               "english_casual": "casual conversational English version",
-              "tip_bn": "optional 1-2 line tip in Bangla explaining vocabulary or grammar, or null",
+              "tip_bn": "optional 1-2 line tip in $langName explaining vocabulary or grammar, or null",
               "key_phrases": [
                 { "english": "phrase in english", "bangla": "phrase in bangla" }
               ]

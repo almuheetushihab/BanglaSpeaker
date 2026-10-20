@@ -1,25 +1,29 @@
 package com.banglaenglish.speaker.ui.screen.practice
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,12 +32,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.banglaenglish.speaker.R
+import com.banglaenglish.speaker.ui.components.ScreenBackground
+import com.banglaenglish.speaker.ui.components.TopBarHeader
 import com.banglaenglish.speaker.ui.screen.practice.components.RepeatAfterMeSection
 import com.banglaenglish.speaker.ui.screen.practice.components.RoleplaySection
 import com.banglaenglish.speaker.ui.screen.practice.components.VocabNotebookSection
+import com.banglaenglish.speaker.ui.theme.AppTheme
 import com.banglaenglish.speaker.ui.theme.BanglaSpeakerTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PracticeScreen(
     initialTargetSentence: String? = null,
@@ -65,7 +71,6 @@ fun PracticeScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PracticeScreenContent(
     state: PracticeUiState,
@@ -78,80 +83,88 @@ fun PracticeScreenContent(
     onRateCard: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.practice_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-        ) {
-            // Streak Banner
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.fillMaxWidth()
+    ScreenBackground(modifier = modifier) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            contentWindowInsets = WindowInsets.safeDrawing,
+            topBar = {
+                TopBarHeader(
+                    title = stringResource(R.string.practice_title),
+                    streakDays = state.streakDays
+                )
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                // Warm Gradient Streak Card
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.streak_title, state.streakDays),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontWeight = FontWeight.Bold
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(AppTheme.colors.warmGradient)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.streak_title, state.streakDays),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // Tabs
+                TabRow(selectedTabIndex = state.selectedTab) {
+                    Tab(
+                        selected = state.selectedTab == 0,
+                        onClick = { onTabSelected(0) },
+                        text = { Text(stringResource(R.string.tab_repeat_after_me), fontWeight = FontWeight.SemiBold) }
+                    )
+                    Tab(
+                        selected = state.selectedTab == 1,
+                        onClick = { onTabSelected(1) },
+                        text = { Text(stringResource(R.string.tab_roleplay), fontWeight = FontWeight.SemiBold) }
+                    )
+                    Tab(
+                        selected = state.selectedTab == 2,
+                        onClick = { onTabSelected(2) },
+                        text = { Text(stringResource(R.string.tab_vocabulary), fontWeight = FontWeight.SemiBold) }
                     )
                 }
-            }
 
-            // Tabs
-            TabRow(selectedTabIndex = state.selectedTab) {
-                Tab(
-                    selected = state.selectedTab == 0,
-                    onClick = { onTabSelected(0) },
-                    text = { Text(stringResource(R.string.tab_repeat_after_me)) }
-                )
-                Tab(
-                    selected = state.selectedTab == 1,
-                    onClick = { onTabSelected(1) },
-                    text = { Text(stringResource(R.string.tab_roleplay)) }
-                )
-                Tab(
-                    selected = state.selectedTab == 2,
-                    onClick = { onTabSelected(2) },
-                    text = { Text(stringResource(R.string.tab_vocabulary)) }
-                )
-            }
-
-            when (state.selectedTab) {
-                0 -> RepeatAfterMeSection(
-                    state = state,
-                    onPlayTarget = onPlayTarget,
-                    onToggleRecording = onToggleRecording
-                )
-                1 -> RoleplaySection(
-                    state = state,
-                    onScenarioSelected = onScenarioSelected,
-                    onSendUserReply = onSendUserReply
-                )
-                else -> VocabNotebookSection(
-                    state = state,
-                    onFlipCard = onFlipCard,
-                    onRateCard = onRateCard
-                )
+                when (state.selectedTab) {
+                    0 -> RepeatAfterMeSection(
+                        state = state,
+                        onPlayTarget = onPlayTarget,
+                        onToggleRecording = onToggleRecording
+                    )
+                    1 -> RoleplaySection(
+                        state = state,
+                        onScenarioSelected = onScenarioSelected,
+                        onSendUserReply = onSendUserReply
+                    )
+                    else -> VocabNotebookSection(
+                        state = state,
+                        onFlipCard = onFlipCard,
+                        onRateCard = onRateCard
+                    )
+                }
             }
         }
     }

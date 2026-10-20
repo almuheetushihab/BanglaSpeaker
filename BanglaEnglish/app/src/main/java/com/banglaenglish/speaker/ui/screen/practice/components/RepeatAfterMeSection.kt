@@ -1,10 +1,16 @@
 package com.banglaenglish.speaker.ui.screen.practice.components
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,17 +23,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.Stop
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import com.banglaenglish.speaker.R
 import com.banglaenglish.speaker.ui.screen.practice.PracticeUiState
 import com.banglaenglish.speaker.ui.screen.practice.WordResult
+import com.banglaenglish.speaker.ui.theme.AppTheme
 import com.banglaenglish.speaker.ui.theme.BanglaSpeakerTheme
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -61,41 +72,59 @@ fun RepeatAfterMeSection(
 
         // Target Sentence Card
         Card(
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
                     text = state.targetSentence,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
                 )
 
-                IconButton(onClick = onPlayTarget) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.VolumeUp,
-                        contentDescription = stringResource(R.string.repeat_listen),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(
+                        onClick = onPlayTarget,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.VolumeUp,
+                            contentDescription = stringResource(R.string.repeat_listen),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }
 
-        // Mic Record Button
-        Button(
-            onClick = onToggleRecording,
-            shape = CircleShape,
-            modifier = Modifier.size(72.dp)
+        // Hero Record Button
+        Box(
+            modifier = Modifier
+                .padding(vertical = 12.dp)
+                .size(96.dp)
+                .shadow(10.dp, CircleShape)
+                .clip(CircleShape)
+                .background(
+                    if (state.isRecording) AppTheme.colors.warmGradient else AppTheme.colors.primaryGradient
+                )
+                .clickable(onClick = onToggleRecording),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = if (state.isRecording) Icons.Rounded.Stop else Icons.Rounded.Mic,
                 contentDescription = null,
-                modifier = Modifier.size(32.dp)
+                tint = Color.White,
+                modifier = Modifier.size(44.dp)
             )
         }
 
@@ -107,49 +136,61 @@ fun RepeatAfterMeSection(
             )
         }
 
-        // Comparison Result & Score
+        // Animated Score Ring & Word Match Chips
         if (state.score != null) {
+            val animatedScoreProgress by animateFloatAsState(
+                targetValue = (state.score.coerceIn(0, 100) / 100f),
+                animationSpec = tween(durationMillis = 800),
+                label = "scoreProgress"
+            )
+
             Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (state.score >= 80) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-                ),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.repeat_score, state.score),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    // Score Circular Progress
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.size(110.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            progress = { animatedScoreProgress },
+                            modifier = Modifier.fillMaxSize(),
+                            color = if (state.score >= 80) AppTheme.colors.intentAnswer else AppTheme.colors.intentCommand,
+                            strokeWidth = 10.dp,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                        Text(
+                            text = "${state.score}%",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
+                    // Word Chips (Green = Correct, Rose = Missed)
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         state.wordComparison.forEach { wordRes ->
+                            val chipBg = if (wordRes.isMatched) AppTheme.colors.intentAnswer else AppTheme.colors.intentCommand
                             Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = if (wordRes.isMatched) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.error
-                                }
+                                shape = CircleShape,
+                                color = chipBg.copy(alpha = 0.2f)
                             ) {
                                 Text(
                                     text = wordRes.word,
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = if (wordRes.isMatched) {
-                                        MaterialTheme.colorScheme.onPrimary
-                                    } else {
-                                        MaterialTheme.colorScheme.onError
-                                    },
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    color = chipBg,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                 )
                             }
                         }

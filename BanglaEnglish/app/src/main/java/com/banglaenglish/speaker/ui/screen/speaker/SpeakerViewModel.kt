@@ -4,7 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.banglaenglish.speaker.R
+import com.banglaenglish.speaker.data.AppLanguage
 import com.banglaenglish.speaker.data.ConversationItem
+import com.banglaenglish.speaker.data.ConversationScenario
 import com.banglaenglish.speaker.data.SpeechEvent
 import com.banglaenglish.speaker.data.SpeechRecognizerManager
 import com.banglaenglish.speaker.data.TranslationEngineType
@@ -37,6 +39,8 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
     private val speech = SpeechRecognizerManager(application)
     private val translation = TranslationRepository()
     private val userPrefsRepo = UserPreferencesRepository(application)
+    val userPreferences = userPrefsRepo.userPreferences
+
     private val tts = TtsManager(application) { msg -> showMessage(UiText.DynamicString(msg)) }
 
     private var dictationJob: Job? = null
@@ -66,6 +70,14 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
         }
+    }
+
+    fun setScenario(scenario: ConversationScenario) {
+        userPrefsRepo.setScenario(scenario)
+    }
+
+    fun setLanguage(language: AppLanguage) {
+        userPrefsRepo.setLanguage(language)
     }
 
     fun downloadModel() {
@@ -229,11 +241,12 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
         _state.update { it.copy(phase = Phase.Translating) }
 
         viewModelScope.launch {
-            val scenario = userPrefsRepo.userPreferences.value.scenario
+            val prefs = userPrefsRepo.userPreferences.value
             val request = TranslationRequest(
                 banglaText = bangla,
                 history = _state.value.conversation,
-                scenario = scenario
+                scenario = prefs.scenario,
+                appLanguageCode = prefs.language.localeCode.ifBlank { "bn" }
             )
 
             runCatching { translation.translate(request) }
