@@ -1,13 +1,15 @@
-package com.banglaenglish.speaker.ui
+package com.banglaenglish.speaker.ui.screen.speaker
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.banglaenglish.speaker.R
 import com.banglaenglish.speaker.data.ConversationItem
 import com.banglaenglish.speaker.data.SpeechEvent
 import com.banglaenglish.speaker.data.SpeechRecognizerManager
 import com.banglaenglish.speaker.data.TranslationRepository
 import com.banglaenglish.speaker.data.TtsManager
+import com.banglaenglish.speaker.ui.UiText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,14 +25,13 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
 
     private val speech = SpeechRecognizerManager(application)
     private val translation = TranslationRepository()
-    private val tts = TtsManager(application) { msg -> showMessage(msg) }
+    private val tts = TtsManager(application) { msg -> showMessage(UiText.DynamicString(msg)) }
 
     private var listenJob: Job? = null
 
     init {
         downloadModel()
 
-        // Keep the UI phase in sync with the TTS engine.
         viewModelScope.launch {
             tts.isSpeaking.collect { speaking ->
                 _state.update {
@@ -44,8 +45,6 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    // ---------- Public actions (called from UI) ----------
-
     fun downloadModel() {
         _state.update { it.copy(modelState = ModelState.Downloading) }
         viewModelScope.launch {
@@ -55,7 +54,6 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /** Mic button: start listening, or cancel if already listening. */
     fun onMicTapped() {
         when (_state.value.phase) {
             Phase.Listening -> cancelListening()
@@ -88,7 +86,7 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
         _state.update { it.copy(conversation = emptyList()) }
     }
 
-    fun showMessage(message: String) {
+    fun showMessage(message: UiText) {
         _state.update { it.copy(message = message) }
     }
 
@@ -96,11 +94,9 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
         _state.update { it.copy(message = null) }
     }
 
-    // ---------- Internals ----------
-
     private fun startListening() {
         if (!speech.isAvailable()) {
-            showMessage("এই ফোনে Speech Recognition নেই। Google অ্যাপ ইনস্টল/আপডেট করুন।")
+            showMessage(UiText.StringResource(R.string.error_speech_not_available))
             return
         }
         tts.stop()
@@ -122,7 +118,7 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
                             phase = Phase.Idle,
                             partialText = "",
                             micLevel = 0f,
-                            message = event.message,
+                            message = UiText.DynamicString(event.message)
                         )
                     }
                 }
@@ -148,7 +144,7 @@ class SpeakerViewModel(application: Application) : AndroidViewModel(application)
                 _state.update {
                     it.copy(
                         phase = Phase.Idle,
-                        message = "অনুবাদ করা যায়নি। ইন্টারনেট চেক করে আবার চেষ্টা করুন।",
+                        message = UiText.StringResource(R.string.error_translation_failed)
                     )
                 }
             }

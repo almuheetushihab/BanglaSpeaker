@@ -1,3 +1,33 @@
 <resources>
     <string name="app_name">Bangla Speaker</string>
+    <string name="top_app_bar_title">বাংলা → English</string>
+    <string name="action_clear_conversation">মুছে ফেলুন</string>
+    <string name="action_clear_conversation_desc">কথোপকথন মুছে ফেলুন</string>
+    <string name="permission_mic_required">মাইক্রোফোনের অনুমতি ছাড়া বাংলা শোনা সম্ভব নয়।</string>
+
+    <string name="empty_state_title">বাংলায় বলুন, ইংরেজিতে শুনুন</string>
+    <string name="empty_state_description">নিচের মাইক্রোফোনে ট্যাপ করে বাংলায় কথা বলুন। অ্যাপ ইংরেজিতে অনুবাদ করে শুনিয়ে দেবে। তারপর নিজে মুখে বলে প্র্যাকটিস করুন।</string>
+    <string name="example_label">উদাহরণ</string>
+    <string name="example_bangla">আমি আজ অফিসে যাব না।</string>
+    <string name="example_english">I will not go to the office today.</string>
+
+    <string name="model_downloading">প্রথমবার অনুবাদের মডেল (~৩০ MB) ডাউনলোড হচ্ছে। ইন্টারনেট চালু রাখুন।</string>
+    <string name="model_download_failed">মডেল ডাউনলোড হয়নি। ইন্টারনেট চেক করুন।</string>
+    <string name="action_retry">আবার চেষ্টা</string>
+
+    <string name="status_idle">মাইক্রোফোনে ট্যাপ করে বাংলায় বলুন</string>
+    <string name="status_listening">শুনছি… কথা বলুন</string>
+    <string name="status_translating">ইংরেজিতে অনুবাদ করছি…</string>
+    <string name="status_speaking">ইংরেজিতে শোনাচ্ছি…</string>
+    <string name="chip_slow_speech">ধীরে বলো</string>
+    <string name="text_input_placeholder">অথবা বাংলায় টাইপ করুন…</string>
+
+    <string name="action_send">পাঠান</string>
+    <string name="action_play">শুনুন</string>
+    <string name="action_copy">কপি করুন</string>
+    <string name="action_stop">থামুন</string>
+    <string name="action_speak">বলুন</string>
+
+    <string name="error_speech_not_available">এই ফোনে Speech Recognition নেই। Google অ্যাপ ইনস্টল/আপডেট করুন।</string>
+    <string name="error_translation_failed">অনুবাদ করা যায়নি। ইন্টারনেট চেক করে আবার চেষ্টা করুন।</string>
 </resources>
