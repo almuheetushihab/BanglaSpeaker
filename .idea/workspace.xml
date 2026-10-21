@@ -4,90 +4,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cbd87b70-5257-453d-8c0b-e0b182fe369a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/BanglaSpeaker.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.idea/AndroidProjectSystem.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.idea/compiler.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.idea/deploymentTargetSelector.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.idea/gradle.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.idea/runConfigurations.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/build.gradle.kts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/androidTest/java/com/banglaenglish/speaker/ExampleInstrumentedTest.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/AndroidManifest.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/MainActivity.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/GeminiTranslationEngine.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/MlKitTranslationEngine.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/Models.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/SpeechRecognizerManager.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/TranslationEngine.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/TranslationRepository.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/TtsManager.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/UserPreferencesRepository.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/local/AppDatabase.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/local/ConversationDao.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/local/ConversationEntity.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/local/PracticeDao.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/local/PracticeSessionEntity.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/local/VocabularyDao.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/data/local/VocabularyEntity.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/UiText.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/AppChip.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/AudioVisualizerBars.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/BanglaBubble.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/BottomNavigationBar.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/BottomPanel.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/ConversationCard.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/ConversationList.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/EditTranscriptBox.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/EmptyState.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/GradientButton.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/MicButton.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/ModelBanner.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/RecordingTimer.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/ScreenBackground.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/ShimmerLoadingCard.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/components/TopBarHeader.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/history/HistoryScreen.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/history/HistoryViewModel.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/practice/PracticeScreen.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/practice/PracticeViewModel.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/practice/components/RepeatAfterMeSection.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/practice/components/RoleplaySection.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/practice/components/VocabNotebookSection.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/settings/SettingsScreen.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/settings/SettingsViewModel.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/speaker/SpeakerScreen.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/speaker/SpeakerUiState.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/speaker/SpeakerViewModel.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/speaker/components/ConversationCard.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/screen/speaker/components/EditTranscriptBox.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/theme/Color.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/theme/ExtendedTheme.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/theme/MultiPreview.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/theme/Shape.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/theme/Theme.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/java/com/banglaenglish/speaker/ui/theme/Type.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/res/values-bn/strings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/res/values/strings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/res/values/themes.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/main/res/xml/locales_config.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/app/src/test/java/com/banglaenglish/speaker/ExampleUnitTest.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/build.gradle.kts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/gradle.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/gradle/gradle-daemon-jvm.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/gradle/libs.versions.toml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/gradlew" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/gradlew.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BanglaEnglish/settings.gradle.kts" beforeDir="false" />
+    <list default="true" id="cbd87b70-5257-453d-8c0b-e0b182fe369a" name="Changes" comment="feat: update contentWindowInsets to remove safeDrawing and enhance layout consistency">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,20 +62,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Android App.app.executor": "Run",
-    "CidrDebugProfileConversion": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
+    &quot;CidrDebugProfileConversion&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="BanglaSpeaker.app" />
@@ -235,5 +153,26 @@
       <updated>1792466505254</updated>
     </task>
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="feat: add database entities and DAOs for conversation, vocabulary, and practice sessions" />
+    <MESSAGE value="feat: update contentWindowInsets to remove safeDrawing and enhance layout consistency" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: update contentWindowInsets to remove safeDrawing and enhance layout consistency" />
+  </component>
+  <component name="play_dynamic_filters_status">
+    <option name="appIdToCheckInfo">
+      <map>
+        <entry key="com.banglaenglish.speaker">
+          <value>
+            <CheckInfo lastCheckTimestamp="1792496222120" />
+          </value>
+        </entry>
+        <entry key="com.banglaenglish.speaker.test">
+          <value>
+            <CheckInfo lastCheckTimestamp="1792496222120" />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
